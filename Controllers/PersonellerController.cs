@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PersonelYonetim.Data;
 using PersonelYonetim.Models;
@@ -16,12 +17,46 @@ namespace PersonelYonetim.Controllers
             _context = context;
         }
 
-        // GET: /Personeller  -> tum personelleri listele (READ)
-        public async Task<IActionResult> Index()
+        // GET: /Personeller?arama=ali&departman=IT&sadeceAktif=true
+        // Parametreler URL'den (query string) otomatik baglanir; hepsi opsiyonel
+        public async Task<IActionResult> Index(string? arama, string? departman, bool sadeceAktif = false)
         {
-            var personeller = await _context.Personeller
-                .OrderBy(p => p.AdSoyad)
+            // IQueryable: sorgu burada CALISMAZ, sadece tarif edilir.
+            // Kosullari ekledikce SQL'e WHERE olarak eklenir,
+            // veritabanina ancak ToListAsync deyince gidilir.
+            var sorgu = _context.Personeller.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(arama))
+            {
+                // Ad veya e-posta icinde gecsin (SQL'de LIKE '%arama%' olur)
+                sorgu = sorgu.Where(p => p.AdSoyad.Contains(arama) || p.Eposta.Contains(arama));
+            }
+
+            if (!string.IsNullOrWhiteSpace(departman))
+            {
+                sorgu = sorgu.Where(p => p.Departman == departman);
+            }
+
+            if (sadeceAktif)
+            {
+                sorgu = sorgu.Where(p => p.AktifMi);
+            }
+
+            var personeller = await sorgu.OrderBy(p => p.AdSoyad).ToListAsync();
+
+            // Filtre formunu tekrar doldurabilmek icin secimleri view'a tasi
+            ViewData["Arama"] = arama;
+            ViewData["SecilenDepartman"] = departman;
+            ViewData["SadeceAktif"] = sadeceAktif;
+
+            // Acilir liste icin veritabanindaki benzersiz departmanlar
+            var departmanlar = await _context.Personeller
+                .Select(p => p.Departman)
+                .Distinct()
+                .OrderBy(d => d)
                 .ToListAsync();
+            ViewData["Departmanlar"] = new SelectList(departmanlar, departman);
+
             return View(personeller);
         }
 
