@@ -17,9 +17,13 @@ namespace PersonelYonetim.Controllers
             _context = context;
         }
 
-        // GET: /Personeller?arama=ali&departman=IT&sadeceAktif=true
+        // Sayfa basina gosterilecek kayit sayisi
+        private const int SayfaBoyutu = 5;
+
+        // GET: /Personeller?arama=ali&departman=IT&sirala=maas_desc&sayfa=2
         // Parametreler URL'den (query string) otomatik baglanir; hepsi opsiyonel
-        public async Task<IActionResult> Index(string? arama, string? departman, bool sadeceAktif = false)
+        public async Task<IActionResult> Index(string? arama, string? departman,
+            bool sadeceAktif = false, string? sirala = null, int sayfa = 1)
         {
             // IQueryable: sorgu burada CALISMAZ, sadece tarif edilir.
             // Kosullari ekledikce SQL'e WHERE olarak eklenir,
@@ -42,12 +46,49 @@ namespace PersonelYonetim.Controllers
                 sorgu = sorgu.Where(p => p.AktifMi);
             }
 
-            var personeller = await sorgu.OrderBy(p => p.AdSoyad).ToListAsync();
+            // --- SIRALAMA ---
+            // "ad" artan, "ad_desc" azalan... Basliktaki link bu degeri gonderir.
+            sorgu = sirala switch
+            {
+                "ad_desc"    => sorgu.OrderByDescending(p => p.AdSoyad),
+                "departman"  => sorgu.OrderBy(p => p.Departman),
+                "departman_desc" => sorgu.OrderByDescending(p => p.Departman),
+                "maas"       => sorgu.OrderBy(p => p.Maas),
+                "maas_desc"  => sorgu.OrderByDescending(p => p.Maas),
+                "tarih"      => sorgu.OrderBy(p => p.IseGirisTarihi),
+                "tarih_desc" => sorgu.OrderByDescending(p => p.IseGirisTarihi),
+                _            => sorgu.OrderBy(p => p.AdSoyad)   // varsayilan: ada gore artan
+            };
+
+            // --- SAYFALAMA ---
+            // Once filtrelenmis toplam kayit sayisini ogren (COUNT sorgusu)
+            var toplamKayit = await sorgu.CountAsync();
+            var toplamSayfa = Math.Max(1, (int)Math.Ceiling(toplamKayit / (double)SayfaBoyutu));
+            sayfa = Math.Clamp(sayfa, 1, toplamSayfa);   // gecersiz sayfa numarasini duzelt
+
+            // Skip/Take: SQL'de LIMIT/OFFSET olur — sadece o sayfanin kayitlari cekilir
+            var personeller = await sorgu
+                .Skip((sayfa - 1) * SayfaBoyutu)
+                .Take(SayfaBoyutu)
+                .ToListAsync();
 
             // Filtre formunu tekrar doldurabilmek icin secimleri view'a tasi
             ViewData["Arama"] = arama;
             ViewData["SecilenDepartman"] = departman;
             ViewData["SadeceAktif"] = sadeceAktif;
+
+            // Siralama: her sutun icin "tiklaninca gonderilecek" degeri hesapla.
+            // Ayni sutuna ikinci tiklama yonu tersine cevirir (toggle mantigi).
+            ViewData["MevcutSirala"] = sirala;
+            ViewData["AdSirala"] = string.IsNullOrEmpty(sirala) ? "ad_desc" : "";
+            ViewData["DepartmanSirala"] = sirala == "departman" ? "departman_desc" : "departman";
+            ViewData["MaasSirala"] = sirala == "maas" ? "maas_desc" : "maas";
+            ViewData["TarihSirala"] = sirala == "tarih" ? "tarih_desc" : "tarih";
+
+            // Sayfalama bilgileri
+            ViewData["Sayfa"] = sayfa;
+            ViewData["ToplamSayfa"] = toplamSayfa;
+            ViewData["ToplamKayit"] = toplamKayit;
 
             // Acilir liste icin veritabanindaki benzersiz departmanlar
             var departmanlar = await _context.Personeller
