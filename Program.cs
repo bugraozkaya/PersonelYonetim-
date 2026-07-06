@@ -1,7 +1,18 @@
+using Microsoft.EntityFrameworkCore;
+using PersonelYonetim.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// ... var builder satiri zaten var ...
+
+builder.Services.AddControllersWithViews();   // bu satir sablonda zaten var
+
+// DbContext'i DI konteynerine ekle; baglanti dizesini appsettings'ten oku
+builder.Services.AddDbContext<UygulamaDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("VarsayilanBaglanti")));
 
 var app = builder.Build();
 
