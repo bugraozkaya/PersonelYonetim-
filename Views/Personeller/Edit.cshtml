@@ -1,0 +1,67 @@
+@model Personel
+
+@{
+    ViewData["Title"] = "Personel Düzenle";
+}
+
+<h1>Personel Düzenle</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Edit" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            @* Id gizli alanda tasinir: kullanici gormez ama POST ile gonderilir *@
+            <input type="hidden" asp-for="Id" />
+
+            <div class="mb-3">
+                <label asp-for="AdSoyad" class="form-label"></label>
+                <input asp-for="AdSoyad" class="form-control" />
+                <span asp-validation-for="AdSoyad" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Departman" class="form-label"></label>
+                <input asp-for="Departman" class="form-control" />
+                <span asp-validation-for="Departman" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Pozisyon" class="form-label"></label>
+                <input asp-for="Pozisyon" class="form-control" />
+                <span asp-validation-for="Pozisyon" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Eposta" class="form-label"></label>
+                <input asp-for="Eposta" class="form-control" />
+                <span asp-validation-for="Eposta" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Maas" class="form-label"></label>
+                <input asp-for="Maas" class="form-control" />
+                <span asp-validation-for="Maas" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="IseGirisTarihi" class="form-label"></label>
+                <input asp-for="IseGirisTarihi" class="form-control" />
+                <span asp-validation-for="IseGirisTarihi" class="text-danger"></span>
+            </div>
+
+            <div class="form-check mb-3">
+                <input asp-for="AktifMi" class="form-check-input" />
+                <label asp-for="AktifMi" class="form-check-label"></label>
+            </div>
+
+            <button type="submit" class="btn btn-warning">Güncelle</button>
+            <a asp-action="Index" class="btn btn-secondary">İptal</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

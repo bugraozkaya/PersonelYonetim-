@@ -3,12 +3,8 @@ using PersonelYonetim.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// MVC (Controller + View) servislerini ekle
 builder.Services.AddControllersWithViews();
-
-// ... var builder satiri zaten var ...
-
-builder.Services.AddControllersWithViews();   // bu satir sablonda zaten var
 
 // DbContext'i DI konteynerine ekle; baglanti dizesini appsettings'ten oku
 builder.Services.AddDbContext<UygulamaDbContext>(options =>
@@ -33,8 +29,6 @@ app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
-
+    pattern: "{controller=Personeller}/{action=Index}/{id?}");
 
 app.Run();

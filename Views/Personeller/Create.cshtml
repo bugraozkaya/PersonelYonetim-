@@ -1,0 +1,68 @@
+@model Personel
+
+@{
+    ViewData["Title"] = "Yeni Personel";
+}
+
+<h1>Yeni Personel Ekle</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        @* form tag helper'i antiforgery token'i otomatik olarak forma gomer *@
+        <form asp-action="Create" method="post">
+            @* Modelin geneline ait dogrulama hatalarinin ozeti *@
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="AdSoyad" class="form-label"></label>
+                <input asp-for="AdSoyad" class="form-control" />
+                <span asp-validation-for="AdSoyad" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Departman" class="form-label"></label>
+                <input asp-for="Departman" class="form-control" />
+                <span asp-validation-for="Departman" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Pozisyon" class="form-label"></label>
+                <input asp-for="Pozisyon" class="form-control" />
+                <span asp-validation-for="Pozisyon" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Eposta" class="form-label"></label>
+                <input asp-for="Eposta" class="form-control" placeholder="ornek@sirket.com" />
+                <span asp-validation-for="Eposta" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Maas" class="form-label"></label>
+                <input asp-for="Maas" class="form-control" />
+                <span asp-validation-for="Maas" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="IseGirisTarihi" class="form-label"></label>
+                @* Modeldeki [DataType(Date)] sayesinde tarih secici olarak acilir *@
+                <input asp-for="IseGirisTarihi" class="form-control" />
+                <span asp-validation-for="IseGirisTarihi" class="text-danger"></span>
+            </div>
+
+            <div class="form-check mb-3">
+                <input asp-for="AktifMi" class="form-check-input" />
+                <label asp-for="AktifMi" class="form-check-label"></label>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Kaydet</button>
+            <a asp-action="Index" class="btn btn-secondary">İptal</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @* jQuery Validation: dogrulamanin tarayici tarafinda da calismasini saglar *@
+    <partial name="_ValidationScriptsPartial" />
+}
