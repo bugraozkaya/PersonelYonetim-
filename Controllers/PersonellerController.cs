@@ -157,32 +157,38 @@ namespace PersonelYonetim.Controllers
             var kayitlar = await FiltreliSorgu(arama, departmanId, sadeceAktif, sirala).ToListAsync();
             var tr = new System.Globalization.CultureInfo("tr-TR");
 
+            // Ayirac olarak TAB, kodlama olarak UTF-16 kullaniyoruz.
+            // Neden? UTF-8 BOM'u bazi Excel surumleri yok sayip Turkce
+            // karakterleri bozuyor. UTF-16 imzasi ise her Excel'de taninir
+            // ve tab'li sutunlar otomatik ayrilir - en garantili kombinasyon.
             var sb = new StringBuilder();
-            // Turkce Excel sutun ayiraci olarak ';' bekler
-            sb.AppendLine("Ad Soyad;Departman;Pozisyon;E-posta;Maaş;İşe Giriş Tarihi;Durum");
+            sb.AppendLine("Ad Soyad\tDepartman\tPozisyon\tE-posta\tMaaş\tİşe Giriş Tarihi\tDurum");
             foreach (var p in kayitlar)
             {
-                sb.AppendLine(string.Join(';',
-                    Temizle(p.AdSoyad),
-                    Temizle(p.Departman!.Ad),
-                    Temizle(p.Pozisyon),
-                    Temizle(p.Eposta),
-                    p.Maas.ToString("N2", tr),
+                sb.AppendLine(string.Join('\t',
+                    Csv(p.AdSoyad),
+                    Csv(p.Departman!.Ad),
+                    Csv(p.Pozisyon),
+                    Csv(p.Eposta),
+                    // Binlik ayracsiz yaz (120000,00): "120.000,00" bazi Excel
+                    // ayarlarinda metin saniliyordu
+                    p.Maas.ToString("0.00", tr),
                     p.IseGirisTarihi.ToString("dd.MM.yyyy"),
                     p.AktifMi ? "Aktif" : "Pasif"));
             }
 
-            // UTF-8 BOM (preamble): olmadan Excel Turkce karakterleri bozuk gosterir
-            var icerik = Encoding.UTF8.GetPreamble()
-                .Concat(Encoding.UTF8.GetBytes(sb.ToString()))
+            // Encoding.Unicode = UTF-16 LE; GetPreamble() dosya basina BOM imzasini koyar
+            var icerik = Encoding.Unicode.GetPreamble()
+                .Concat(Encoding.Unicode.GetBytes(sb.ToString()))
                 .ToArray();
 
             // File(): tarayiciya "bunu sayfa olarak acma, dosya olarak indir" der
             return File(icerik, "text/csv", $"personeller_{DateTime.Now:yyyyMMdd_HHmm}.csv");
         }
 
-        // Hucre icindeki ';' ayiraci bozmasin diye virgule cevir
-        private static string Temizle(string deger) => deger.Replace(";", ",");
+        // Metin alanlarini CSV standardina gore tirnak icine al:
+        // icinde ';' veya tirnak olsa bile hucre bolunmez
+        private static string Csv(string deger) => "\"" + deger.Replace("\"", "\"\"") + "\"";
 
         // GET: /Personeller/Details/5
         public async Task<IActionResult> Details(int? id)

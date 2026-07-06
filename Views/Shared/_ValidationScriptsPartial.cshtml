@@ -1,2 +1,18 @@
-﻿<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
 <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+
+@* jQuery Validation varsayilan olarak sayilarda NOKTA bekler (Ingilizce kural).
+   Turkce'de ondalik ayraci VIRGUL oldugu icin "120000,00" gibi degerler
+   "sayi degil" hatasina takiliyordu. Asagidaki iki override virgulu de kabul eder. *@
+<script>
+    // Sayi kontrolu: hem "1234.56" hem "1234,56" gecerli sayilsin
+    $.validator.methods.number = function (value, element) {
+        return this.optional(element) || /^-?\d+([.,]\d+)?$/.test(value);
+    };
+
+    // Aralik (Range) kontrolu: karsilastirmadan once virgulu noktaya cevir
+    $.validator.methods.range = function (value, element, param) {
+        var sayi = parseFloat(String(value).replace(",", "."));
+        return this.optional(element) || (sayi >= param[0] && sayi <= param[1]);
+    };
+</script>

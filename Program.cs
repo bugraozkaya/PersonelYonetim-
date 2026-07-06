@@ -1,3 +1,5 @@
+using System.Globalization;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using PersonelYonetim.Data;
 
@@ -11,6 +13,18 @@ builder.Services.AddDbContext<UygulamaDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("VarsayilanBaglanti")));
 
 var app = builder.Build();
+
+// Kulturu tr-TR'ye sabitle: form verileri her zaman Turkce bicimde
+// (virgullu ondalik, gg.aa.yyyy tarih) yorumlanir. Bunu yapmazsak
+// sunucunun/tarayicinin diline gore davranis degisir ve "120000,00"
+// bazen sayi bazen hata olur.
+var kultur = new CultureInfo("tr-TR");
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture(kultur),
+    SupportedCultures = new[] { kultur },
+    SupportedUICultures = new[] { kultur }
+});
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
