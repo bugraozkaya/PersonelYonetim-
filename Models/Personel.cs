@@ -14,9 +14,15 @@ namespace PersonelYonetim.Models
         [Display(Name = "Ad Soyad")]
         public string AdSoyad { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Departman alanı zorunludur.")]
+        // FOREIGN KEY: Departmanlar tablosundaki bir kaydin Id'sini tutar.
+        // "XxxId" + "Xxx" navigation ikilisini EF Core otomatik iliskilendirir.
+        [Range(1, int.MaxValue, ErrorMessage = "Lütfen bir departman seçiniz.")]
         [Display(Name = "Departman")]
-        public string Departman { get; set; } = string.Empty;
+        public int DepartmanId { get; set; }
+
+        // Navigation property: iliskili Departman kaydina kod icinden erisim
+        // (p.Departman.Ad gibi). Sorguda .Include() ile doldurulur.
+        public Departman? Departman { get; set; }
 
         [Required(ErrorMessage = "Pozisyon alanı zorunludur.")]
         [Display(Name = "Pozisyon")]
@@ -39,5 +45,10 @@ namespace PersonelYonetim.Models
 
         [Display(Name = "Aktif mi?")]
         public bool AktifMi { get; set; } = true;   // varsayilan: aktif
+
+        // Yuklenen fotografin wwwroot icindeki yolu (orn. /fotograflar/abc.jpg).
+        // Fotograf zorunlu degil, o yuzden nullable (string?).
+        [Display(Name = "Fotoğraf")]
+        public string? FotografYolu { get; set; }
     }
 }

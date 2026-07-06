@@ -15,5 +15,8 @@ namespace PersonelYonetim.Data
         // Bu satir "Personeller adinda bir tablom var" demek.
         // Sorgular hep bunun uzerinden yapilir: _context.Personeller...
         public DbSet<Personel> Personeller { get; set; }
+
+        // Yeni tablo: Departmanlar (Personeller ile 1-e-cok iliskili)
+        public DbSet<Departman> Departmanlar { get; set; }
     }
 }

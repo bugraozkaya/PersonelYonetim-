@@ -9,11 +9,12 @@
 
 <div class="row">
     <div class="col-md-6">
-        <form asp-action="Edit" method="post">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            @* Id gizli alanda tasinir: kullanici gormez ama POST ile gonderilir *@
+            @* Id ve mevcut fotograf yolu gizli tasinir: kullanici gormez ama POST'ta gider *@
             <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="FotografYolu" />
 
             <div class="mb-3">
                 <label asp-for="AdSoyad" class="form-label"></label>
@@ -22,9 +23,12 @@
             </div>
 
             <div class="mb-3">
-                <label asp-for="Departman" class="form-label"></label>
-                <input asp-for="Departman" class="form-control" />
-                <span asp-validation-for="Departman" class="text-danger"></span>
+                <label asp-for="DepartmanId" class="form-label"></label>
+                <select asp-for="DepartmanId" class="form-select"
+                        asp-items="@((SelectList)ViewData["DepartmanListesi"]!)">
+                    <option value="">-- Departman Seçiniz --</option>
+                </select>
+                <span asp-validation-for="DepartmanId" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
@@ -49,6 +53,20 @@
                 <label asp-for="IseGirisTarihi" class="form-label"></label>
                 <input asp-for="IseGirisTarihi" class="form-control" />
                 <span asp-validation-for="IseGirisTarihi" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Fotoğraf</label>
+                @if (!string.IsNullOrEmpty(Model.FotografYolu))
+                {
+                    <div class="mb-2">
+                        <img src="@Model.FotografYolu" alt="@Model.AdSoyad" class="rounded"
+                             style="width: 80px; height: 80px; object-fit: cover;" />
+                        <small class="text-muted d-block">Yeni dosya seçersen mevcut fotoğraf değişir.</small>
+                    </div>
+                }
+                <input type="file" name="fotograf" class="form-control" accept=".jpg,.jpeg,.png" />
+                <span asp-validation-for="FotografYolu" class="text-danger"></span>
             </div>
 
             <div class="form-check mb-3">

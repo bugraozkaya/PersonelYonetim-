@@ -12,8 +12,8 @@
     <dt class="col-sm-3">@Html.DisplayNameFor(m => m.AdSoyad)</dt>
     <dd class="col-sm-9">@Model.AdSoyad</dd>
 
-    <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Departman)</dt>
-    <dd class="col-sm-9">@Model.Departman</dd>
+    <dt class="col-sm-3">@Html.DisplayNameFor(m => m.DepartmanId)</dt>
+    <dd class="col-sm-9">@Model.Departman!.Ad</dd>
 
     <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Pozisyon)</dt>
     <dd class="col-sm-9">@Model.Pozisyon</dd>
@@ -22,8 +22,7 @@
     <dd class="col-sm-9">@Model.Eposta</dd>
 </dl>
 
-@* Silme GET ile degil, onayli POST ile yapilir (guvenlik geregi).
-   Bu form controller'daki DeleteConfirmed action'ina gider. *@
+@* Silme GET ile degil, onayli POST ile yapilir (guvenlik geregi) *@
 <form asp-action="Delete" method="post">
     <input type="hidden" asp-for="Id" />
     <button type="submit" class="btn btn-danger">Evet, Sil</button>

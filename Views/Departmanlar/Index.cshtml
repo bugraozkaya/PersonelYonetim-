@@ -1,0 +1,58 @@
+@model IEnumerable<Departman>
+
+@{
+    ViewData["Title"] = "Departmanlar";
+}
+
+<h1>Departmanlar</h1>
+
+@* Hata mesaji (basari mesaji _Layout'ta gosteriliyor) *@
+@if (TempData["Hata"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Hata"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+    </div>
+}
+
+@* Yeni departman ekleme: ayri sayfaya gerek yok, kucuk bir satir formu yeterli *@
+<form asp-action="Ekle" method="post" class="row g-2 mb-4" style="max-width: 480px;">
+    <div class="col-8">
+        <input type="text" name="ad" class="form-control" placeholder="Yeni departman adı" maxlength="50" />
+    </div>
+    <div class="col-4">
+        <button type="submit" class="btn btn-primary w-100">Ekle</button>
+    </div>
+</form>
+
+<table class="table table-striped align-middle" style="max-width: 640px;">
+    <thead class="table-dark">
+        <tr>
+            <th>Departman</th>
+            <th class="text-center">Personel Sayısı</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var d in Model)
+    {
+        <tr>
+            <td>@d.Ad</td>
+            <td class="text-center">
+                <span class="badge bg-info text-dark">@d.Personeller.Count</span>
+            </td>
+            <td class="text-end">
+                @* Icinde personel olan departmanin sil butonu pasif -
+                   sunucu tarafi da ayrica kontrol ediyor (cift guvenlik) *@
+                <form asp-action="Sil" asp-route-id="@d.Id" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                            disabled="@(d.Personeller.Any() ? "disabled" : null)"
+                            title="@(d.Personeller.Any() ? "İçinde personel olan departman silinemez" : "Departmanı sil")">
+                        Sil
+                    </button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

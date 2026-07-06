@@ -7,38 +7,55 @@
 <h1>Personel Detayı</h1>
 <hr />
 
-@* dt: etiket, dd: deger. DisplayNameFor modeldeki [Display(Name=...)] metnini basar *@
-<dl class="row">
-    <dt class="col-sm-3">@Html.DisplayNameFor(m => m.AdSoyad)</dt>
-    <dd class="col-sm-9">@Model.AdSoyad</dd>
-
-    <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Departman)</dt>
-    <dd class="col-sm-9">@Model.Departman</dd>
-
-    <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Pozisyon)</dt>
-    <dd class="col-sm-9">@Model.Pozisyon</dd>
-
-    <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Eposta)</dt>
-    <dd class="col-sm-9">@Model.Eposta</dd>
-
-    <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Maas)</dt>
-    <dd class="col-sm-9">@Model.Maas.ToString("C2", new System.Globalization.CultureInfo("tr-TR"))</dd>
-
-    <dt class="col-sm-3">@Html.DisplayNameFor(m => m.IseGirisTarihi)</dt>
-    <dd class="col-sm-9">@Model.IseGirisTarihi.ToString("dd.MM.yyyy")</dd>
-
-    <dt class="col-sm-3">@Html.DisplayNameFor(m => m.AktifMi)</dt>
-    <dd class="col-sm-9">
-        @if (Model.AktifMi)
+<div class="row">
+    <div class="col-auto">
+        @* Fotograf varsa buyuk goster, yoksa bas harfli buyuk rozet *@
+        @if (!string.IsNullOrEmpty(Model.FotografYolu))
         {
-            <span class="badge bg-success">Aktif</span>
+            <img src="@Model.FotografYolu" alt="@Model.AdSoyad" class="rounded shadow-sm"
+                 style="width: 140px; height: 140px; object-fit: cover;" />
         }
         else
         {
-            <span class="badge bg-secondary">Pasif</span>
+            <span class="rounded bg-secondary text-white d-inline-flex
+                         justify-content-center align-items-center fs-1"
+                  style="width: 140px; height: 140px;">@Model.AdSoyad[0]</span>
         }
-    </dd>
-</dl>
+    </div>
+    <div class="col">
+        <dl class="row">
+            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.AdSoyad)</dt>
+            <dd class="col-sm-9">@Model.AdSoyad</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.DepartmanId)</dt>
+            <dd class="col-sm-9">@Model.Departman!.Ad</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Pozisyon)</dt>
+            <dd class="col-sm-9">@Model.Pozisyon</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Eposta)</dt>
+            <dd class="col-sm-9">@Model.Eposta</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Maas)</dt>
+            <dd class="col-sm-9">@Model.Maas.ToString("C2", new System.Globalization.CultureInfo("tr-TR"))</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.IseGirisTarihi)</dt>
+            <dd class="col-sm-9">@Model.IseGirisTarihi.ToString("dd.MM.yyyy")</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.AktifMi)</dt>
+            <dd class="col-sm-9">
+                @if (Model.AktifMi)
+                {
+                    <span class="badge bg-success">Aktif</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">Pasif</span>
+                }
+            </dd>
+        </dl>
+    </div>
+</div>
 
 <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Düzenle</a>
 <a asp-action="Index" class="btn btn-secondary">Listeye Dön</a>

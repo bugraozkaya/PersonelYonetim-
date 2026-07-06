@@ -5,15 +5,15 @@
 
     // ViewData'dan gelen degerleri bir kez degiskene alalim: asagisi temiz kalsin
     var arama = (string?)ViewData["Arama"];
-    var secilenDepartman = (string?)ViewData["SecilenDepartman"];
+    var secilenDepartmanId = (int?)ViewData["SecilenDepartmanId"];
     var sadeceAktif = (bool)ViewData["SadeceAktif"]!;
     var mevcutSirala = (string?)ViewData["MevcutSirala"];
     var sayfa = (int)ViewData["Sayfa"]!;
     var toplamSayfa = (int)ViewData["ToplamSayfa"]!;
     var toplamKayit = (int)ViewData["ToplamKayit"]!;
 
-    // Checkbox isaretliyse route'a "true" yaz, degilse hic yazma
     var aktifParam = sadeceAktif ? "true" : null;
+    var departmanParam = secilenDepartmanId?.ToString();
 
     // Aktif siralanan sutunun yanina yon oku koy
     string Ok(string asc) => mevcutSirala == asc ? " ▲"
@@ -24,7 +24,13 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Personel Listesi</h1>
-    <a asp-action="Create" class="btn btn-primary">+ Yeni Personel Ekle</a>
+    <div>
+        @* CSV butonu mevcut filtreleri tasir: ekranda ne varsa onu indirir *@
+        <a asp-action="DisariAktar" asp-route-arama="@arama"
+           asp-route-departmanId="@departmanParam" asp-route-sadeceAktif="@aktifParam"
+           asp-route-sirala="@mevcutSirala" class="btn btn-success">CSV İndir</a>
+        <a asp-action="Create" class="btn btn-primary">+ Yeni Personel Ekle</a>
+    </div>
 </div>
 
 @* Arama/filtre formu: method="get" oldugu icin secimler URL'ye yazilir *@
@@ -37,8 +43,8 @@
         </div>
         <div class="col-md-3">
             <label class="form-label">Departman</label>
-            <select name="departman" class="form-select"
-                    asp-items="@((SelectList)ViewData["Departmanlar"]!)">
+            <select name="departmanId" class="form-select"
+                    asp-items="@((SelectList)ViewData["DepartmanFiltre"]!)">
                 <option value="">Tümü</option>
             </select>
         </div>
@@ -68,20 +74,18 @@ else
     <table class="table table-striped table-hover align-middle">
         <thead class="table-dark">
             <tr>
-                @* Baslik linkleri: tiklaninca sirala parametresini degistirir.
-                   Filtreler (arama, departman...) linke tasinir ki kaybolmasin;
-                   sayfa=1'e doner cunku siralama degisince eski sayfa anlamsizdir *@
+                <th></th>
                 <th>
                     <a class="text-white text-decoration-none" asp-action="Index"
                        asp-route-sirala="@ViewData["AdSirala"]" asp-route-arama="@arama"
-                       asp-route-departman="@secilenDepartman" asp-route-sadeceAktif="@aktifParam">
+                       asp-route-departmanId="@departmanParam" asp-route-sadeceAktif="@aktifParam">
                         Ad Soyad@(adOk)
                     </a>
                 </th>
                 <th>
                     <a class="text-white text-decoration-none" asp-action="Index"
                        asp-route-sirala="@ViewData["DepartmanSirala"]" asp-route-arama="@arama"
-                       asp-route-departman="@secilenDepartman" asp-route-sadeceAktif="@aktifParam">
+                       asp-route-departmanId="@departmanParam" asp-route-sadeceAktif="@aktifParam">
                         Departman@(Ok("departman"))
                     </a>
                 </th>
@@ -90,14 +94,14 @@ else
                 <th class="text-end">
                     <a class="text-white text-decoration-none" asp-action="Index"
                        asp-route-sirala="@ViewData["MaasSirala"]" asp-route-arama="@arama"
-                       asp-route-departman="@secilenDepartman" asp-route-sadeceAktif="@aktifParam">
+                       asp-route-departmanId="@departmanParam" asp-route-sadeceAktif="@aktifParam">
                         Maaş@(Ok("maas"))
                     </a>
                 </th>
                 <th>
                     <a class="text-white text-decoration-none" asp-action="Index"
                        asp-route-sirala="@ViewData["TarihSirala"]" asp-route-arama="@arama"
-                       asp-route-departman="@secilenDepartman" asp-route-sadeceAktif="@aktifParam">
+                       asp-route-departmanId="@departmanParam" asp-route-sadeceAktif="@aktifParam">
                         İşe Giriş@(Ok("tarih"))
                     </a>
                 </th>
@@ -109,8 +113,22 @@ else
         @foreach (var p in Model)
         {
             <tr>
+                <td>
+                    @* Fotograf varsa kucuk yuvarlak goster, yoksa bas harfli rozet *@
+                    @if (!string.IsNullOrEmpty(p.FotografYolu))
+                    {
+                        <img src="@p.FotografYolu" alt="@p.AdSoyad" class="rounded-circle"
+                             style="width: 40px; height: 40px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <span class="rounded-circle bg-secondary text-white d-inline-flex
+                                     justify-content-center align-items-center"
+                              style="width: 40px; height: 40px;">@p.AdSoyad[0]</span>
+                    }
+                </td>
                 <td>@p.AdSoyad</td>
-                <td>@p.Departman</td>
+                <td>@p.Departman!.Ad</td>
                 <td>@p.Pozisyon</td>
                 <td>@p.Eposta</td>
                 <td class="text-end">@p.Maas.ToString("C2", new System.Globalization.CultureInfo("tr-TR"))</td>
@@ -142,7 +160,7 @@ else
             <ul class="pagination">
                 <li class="page-item @(sayfa == 1 ? "disabled" : "")">
                     <a class="page-link" asp-action="Index" asp-route-sayfa="@(sayfa - 1)"
-                       asp-route-arama="@arama" asp-route-departman="@secilenDepartman"
+                       asp-route-arama="@arama" asp-route-departmanId="@departmanParam"
                        asp-route-sadeceAktif="@aktifParam" asp-route-sirala="@mevcutSirala">
                         « Önceki
                     </a>
@@ -151,7 +169,7 @@ else
                 {
                     <li class="page-item @(i == sayfa ? "active" : "")">
                         <a class="page-link" asp-action="Index" asp-route-sayfa="@i"
-                           asp-route-arama="@arama" asp-route-departman="@secilenDepartman"
+                           asp-route-arama="@arama" asp-route-departmanId="@departmanParam"
                            asp-route-sadeceAktif="@aktifParam" asp-route-sirala="@mevcutSirala">
                             @i
                         </a>
@@ -159,7 +177,7 @@ else
                 }
                 <li class="page-item @(sayfa == toplamSayfa ? "disabled" : "")">
                     <a class="page-link" asp-action="Index" asp-route-sayfa="@(sayfa + 1)"
-                       asp-route-arama="@arama" asp-route-departman="@secilenDepartman"
+                       asp-route-arama="@arama" asp-route-departmanId="@departmanParam"
                        asp-route-sadeceAktif="@aktifParam" asp-route-sirala="@mevcutSirala">
                         Sonraki »
                     </a>

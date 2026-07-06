@@ -9,9 +9,9 @@
 
 <div class="row">
     <div class="col-md-6">
-        @* form tag helper'i antiforgery token'i otomatik olarak forma gomer *@
-        <form asp-action="Create" method="post">
-            @* Modelin geneline ait dogrulama hatalarinin ozeti *@
+        @* enctype="multipart/form-data": dosya yuklenecekse ZORUNLU.
+           Yoksa tarayici dosyayi gondermez, sadece adini yollar. *@
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="mb-3">
@@ -21,9 +21,13 @@
             </div>
 
             <div class="mb-3">
-                <label asp-for="Departman" class="form-label"></label>
-                <input asp-for="Departman" class="form-control" />
-                <span asp-validation-for="Departman" class="text-danger"></span>
+                <label asp-for="DepartmanId" class="form-label"></label>
+                @* Acilir liste Departmanlar tablosundan doldurulur (controller'da SelectList) *@
+                <select asp-for="DepartmanId" class="form-select"
+                        asp-items="@((SelectList)ViewData["DepartmanListesi"]!)">
+                    <option value="">-- Departman Seçiniz --</option>
+                </select>
+                <span asp-validation-for="DepartmanId" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
@@ -46,9 +50,15 @@
 
             <div class="mb-3">
                 <label asp-for="IseGirisTarihi" class="form-label"></label>
-                @* Modeldeki [DataType(Date)] sayesinde tarih secici olarak acilir *@
                 <input asp-for="IseGirisTarihi" class="form-control" />
                 <span asp-validation-for="IseGirisTarihi" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Fotoğraf (isteğe bağlı, .jpg/.png, en fazla 2 MB)</label>
+                @* name="fotograf": controller'daki IFormFile? fotograf parametresiyle eslesir *@
+                <input type="file" name="fotograf" class="form-control" accept=".jpg,.jpeg,.png" />
+                <span asp-validation-for="FotografYolu" class="text-danger"></span>
             </div>
 
             <div class="form-check mb-3">
@@ -63,6 +73,5 @@
 </div>
 
 @section Scripts {
-    @* jQuery Validation: dogrulamanin tarayici tarafinda da calismasini saglar *@
     <partial name="_ValidationScriptsPartial" />
 }
